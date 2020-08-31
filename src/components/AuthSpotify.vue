@@ -1,6 +1,6 @@
 <template>
   <div class="auth-spotify">
-    <t-button variant="funny">Example button</t-button>
+    <t-button variant="funny" v-on:click="auth">Example button</t-button>
   </div>
 </template>
 
@@ -9,6 +9,17 @@ export default {
   name: 'AuthSpotify',
   props: {
     msg: String
+  },
+  methods: {
+    auth: function () {
+      var scopes = ['user-read-private', 'user-read-email']
+      var state = 'some-state-of-my-choice'
+
+      const spotifyApi = this.spotify
+      const authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
+      
+      console.log(authorizeURL)
+    }
   }
 }
 </script>
