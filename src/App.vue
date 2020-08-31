@@ -1,28 +1,29 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app" class="bg-gray-900 text-white min-h-screen">
+    <div class="container mx-auto">
+        <AuthSpotify msg="test" />
+    </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import AuthSpotify from './components/AuthSpotify.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    AuthSpotify
+  },
+  created: function() {
+    this.spotify.getUser('petteralexis')
+    .then(function(data) {
+        console.log('Some information about this user', data.body);
+    }, function(err) {
+        console.log('Something went wrong!', err);
+    })
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
 </style>
