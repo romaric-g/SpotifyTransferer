@@ -44,11 +44,17 @@ const theme = {
     }
   }
 }
+
+console.log(process.env);
+const clientId = process.env.VUE_APP_SPOTIFY_CLIENT_ID || ""
+const clientSecret = process.env.VUE_APP_SPOTIFY_CLIENT_SECRET || ""
+const redirectUri = process.env.VUE_APP_SPOTIFY_REDIRECT_URI || ""
+
 Vue.use(VueTailwind, theme)
 Vue.use(VueSpotify, new Spotify({
-  clientId: 'bb2b7c9972734a27b963920645abc5b7',
-  clientSecret: 'e52dc272f5134e018e6e9c75cc782a9d',
-  redirectUri: 'http://localhost:8080/'
+  clientId,
+  clientSecret,
+  redirectUri
 }))
 
 Vue.config.productionTip = false
