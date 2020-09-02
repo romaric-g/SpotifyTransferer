@@ -11,7 +11,7 @@ import AuthCallback from '@/components/AuthCallback.vue'
 
 import '@/assets/css/main.css';
 
-const client_id = "testkey"
+const client_id = "bb2b7c9972734a27b963920645abc5b7"
 
 const theme = {
   TButton: {
