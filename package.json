@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "netlify-lambda serve src-functions & vue-cli-service serve",
+    "serve": "netlify-lambda serve src-functions --config ./webpack.functions.js & vue-cli-service serve",
     "build": "netlify-lambda build src-functions && vue-cli-service build",
     "lint": "vue-cli-service lint",
     "postinstall": "netlify-lambda install"
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "dotenv-webpack": "^2.0.0",
     "netlify-lambda": "^2.0.1",
     "spotify-web-api-node": "^4.0.0",
     "tailwindcss": "^1.7.6",
