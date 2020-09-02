@@ -1,4 +1,4 @@
-exports.handler = function(event, context, callback) {
+export function handler(event, context, callback) {
   console.log(event)
   callback(null, {
     statusCode: 200,
