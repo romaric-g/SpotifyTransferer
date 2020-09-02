@@ -3,20 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "netlify-lambda serve src-functions --config ./webpack.functions.js & vue-cli-service serve",
-    "build": "netlify-lambda build src-functions && vue-cli-service build",
+    "servefunc": "netlify-lambda serve src-functions --config ./webpack.functions.js",
+    "serve": "vue-cli-service serve",
+    "buildfunc": "netlify-lambda build src-functions",
+    "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "postinstall": "netlify-lambda install"
   },
   "dependencies": {
     "core-js": "^3.6.5",
     "dotenv-webpack": "^2.0.0",
+    "js-cookie": "^2.2.1",
     "netlify-lambda": "^2.0.1",
     "spotify-web-api-node": "^4.0.0",
     "tailwindcss": "^1.7.6",
     "vue": "^2.6.11",
+    "vue-router": "^3.4.3",
     "vue-spotify": "^1.0.2",
-    "vue-tailwind": "^1.2.0"
+    "vue-tailwind": "^1.2.0",
+    "vuex": "^3.5.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
@@ -28,13 +33,12 @@
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
-    "root": true,
+    "root": false,
     "env": {
       "node": true
     },
     "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
+      "plugin:vue/essential"
     ],
     "parserOptions": {
       "parser": "babel-eslint"
