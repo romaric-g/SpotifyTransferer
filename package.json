@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "build:lambda": "netlify-lambda build src/lambda",
+    "serve": "netlify-lambda serve src-functions & vue-cli-service serve",
+    "build": "netlify-lambda build src-functions && vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "netlify-lambda": "^2.0.1",
     "spotify-web-api-node": "^4.0.0",
     "tailwindcss": "^1.7.6",
     "vue": "^2.6.11",
@@ -19,12 +19,11 @@
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-eslint": "~4.5.0",
-    "@vue/cli-service": "~4.5.0",
+    "@vue/cli-service": "^4.5.4",
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
-    "vue-template-compiler": "^2.6.11",
-    "netlify-lambda": "^2.0.1"
+    "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
     "root": true,
