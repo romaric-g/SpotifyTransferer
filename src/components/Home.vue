@@ -31,12 +31,12 @@ export default {
     }
   },
   mounted () {
-    pulltracks(this.$store).bind(this)
+    pulltracks(this.$store, this.tracks)
   },
   computed: mapState(['sourceToken','targetToken']),
 }
 
-function pulltracks(store, url = 'https://api.spotify.com/v1/me/tracks?limit=50') {
+function pulltracks(store, tracks, url = 'https://api.spotify.com/v1/me/tracks?limit=50') {
     axios({
       method: 'get',
       url,
@@ -49,9 +49,9 @@ function pulltracks(store, url = 'https://api.spotify.com/v1/me/tracks?limit=50'
       var body = response.data
       console.log("Pull tracks", body.offset + "/" + body.total)
       for (let i of body.items)
-        this.tracks.push(i.track.id)
+        tracks.push(i.track.id)
       if (body.next)
-        pulltracks(store, body.next)
+        pulltracks(store, tracks, body.next)
     })
 }
 
