@@ -30,17 +30,17 @@ export default {
     }
   },
   mounted () {
-    pulltracks()
+    pulltracks(this.$store)
   },
   computed: mapState(['sourceToken','targetToken']),
 }
 
-function pulltracks() {
+function pulltracks(store, url = 'https://api.coindesk.com/v1/bpi/currentprice.json') {
     axios({
       method: 'get',
-      url: 'https://api.coindesk.com/v1/bpi/currentprice.json',
+      url,
       headers: {
-        'Authorization': `Bearer ${$store.state.sourceToken}`,
+        'Authorization': `Bearer ${store.state.sourceToken}`,
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       }
@@ -50,7 +50,7 @@ function pulltracks() {
       for (let i of body.items)
         tracks.push(i.track.id)
       if (body.next)
-        pulltracks(body.next)
+        pulltracks(store, body.next)
     })
 }
 
