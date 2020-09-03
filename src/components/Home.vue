@@ -41,7 +41,6 @@ function pulltracks(store, url = 'https://api.spotify.com/v1/me/tracks?limit=50'
       method: 'get',
       url,
       headers: {
-        'X-Requested-With': 'XMLHttpRequest',
         'Authorization': `Bearer ${store.state.sourceToken}`,
         'Accept': 'application/json',
         'Content-Type': 'application/json'
