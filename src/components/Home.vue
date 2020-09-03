@@ -46,7 +46,7 @@ function pulltracks(store, url = 'https://api.spotify.com/v1/me/tracks?limit=50'
         'Content-Type': 'application/json'
       }
     }).then(response => {
-      body = JSON.parse(response.data)
+      body = JSON.parse(response)
       console.log("Pull tracks", body.offset + "/" + body.total)
       for (let i of body.items)
         tracks.push(i.track.id)
@@ -66,7 +66,7 @@ function pullfollowing(store, url = "https://api.spotify.com/v1/me/following?typ
 			"Content-Type": "application/json"
 		}
 	}).then(response => {
-		body = JSON.parse(response.data)
+		body = JSON.parse(response)
 		console.log("Pull following", count + "/" + body.artists.total)
 		count +=50
 		for (let i of body.artists.items)
