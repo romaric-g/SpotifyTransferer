@@ -115,9 +115,11 @@ export default {
         headers: getHeader(this)
       }).then(response => {
         var body = response.data
-        for (let i of body.artists.items)
+        for (let i of body.artists.items) {
           i.checked = true
 		      this.following.push(i)
+        }
+          
 		    if (body.artists.next)
           this.pullfollowing(body.artists.next)
       })
@@ -129,9 +131,10 @@ export default {
         headers: getHeader(this)
       }).then(response => {
         var body = response.data
-        for (let i of body.items)
+        for (let i of body.items) {
           i.album.checked = true
           this.albums.push(i.album)
+        }
         if (body.next)
           this.pullalbums(body.next)
       })
