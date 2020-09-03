@@ -18,6 +18,10 @@ const theme = {
     fixedClasses: 'focus:outline-none inline-flex items-center transition ease-in-out duration-150',
     classes: 'text-white bg-green hover:bg-lightgreen focus:bg-darkgreen focus:shadow-inner active:bg-darkgreen text-sm font-medium uppercase px-4 py-2 rounded-full',
     variants: {}
+  },
+  TCheckbox: {
+    fixedClasses: 'form-checkbox transition duration-150 ease-in-out',
+    classes: 'text-orange-500',
   }
 }
 

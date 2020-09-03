@@ -11,8 +11,8 @@
     <div class="content px-2">
       <template v-if="tracks.length > 0">
         <div class="bg-white shadow-md rounded px-8 py-6 ">
-            <div v-for="(track, index) in tracks" :key="index" class="flex">
-              <t-checkbox v-model="track.checked" /><p>{{track.name}}</p>
+            <div v-for="(track, index) in tracks" :key="index" class="flex items-center my-1">
+              <t-checkbox class="mx-4" v-model="track.checked" /><p class="mx-4 flex-1">{{track.name}}</p>
             </div>
         </div>
       </template>
