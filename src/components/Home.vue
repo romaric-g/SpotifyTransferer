@@ -26,7 +26,8 @@ export default {
   components: {AuthSpotify},
   data: function() {
     return {
-      tracks: []
+      tracks: [],
+      following: []
     }
   },
   mounted () {
@@ -46,7 +47,7 @@ function pulltracks(store, url = 'https://api.coindesk.com/v1/bpi/currentprice.j
         'Content-Type': 'application/json'
       }
     }).then(response => {
-      body = JSON.parse(body)
+      body = JSON.parse(response.data)
       console.log("Pull tracks", body.offset + "/" + body.total)
       for (let i of body.items)
         tracks.push(i.track.id)
@@ -54,6 +55,28 @@ function pulltracks(store, url = 'https://api.coindesk.com/v1/bpi/currentprice.j
         pulltracks(store, body.next)
     })
 }
+
+
+function pullfollowing(store, url = "https://api.spotify.com/v1/me/following?type=artist&limit=50") {
+	axios({
+    method: "GET",
+    url,
+		headers: {
+			'Authorization': `Bearer ${store.state.sourceToken}`,
+			"Accept": "application/json",
+			"Content-Type": "application/json"
+		}
+	}).then(response => {
+		body = JSON.parse(response.data)
+		console.log("Pull following", count + "/" + body.artists.total)
+		count +=50
+		for (let i of body.artists.items)
+		following.push(i.id)
+		if (body.artists.next)
+			pullfollowing(store, body.artists.next)
+	})
+}
+
 
 </script>
 
