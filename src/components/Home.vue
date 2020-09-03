@@ -85,10 +85,11 @@ export default {
     },
     setSelectAllArray: function(array, select) {
       console.log("CALL")
+      if(this.allIsSelected(array) || select) {
         array.forEach(element => {
           element.checked = select
         });
-
+      }
     },
     allIsSelected: function(array) {
       return !array.some(e => e.checked === false)
