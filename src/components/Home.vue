@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="flex justify-between">
+    <div class="flex justify-between mb-4">
       <div class="w-2/5 px-2">
         <AuthSpotify type="source" :token="sourceToken"/>
       </div>
@@ -8,10 +8,14 @@
         <AuthSpotify type="target" :token="targetToken"/>
       </div>
     </div>
-    <div class="border-t-4 bg-white shadow-md rounded">
-      <div v-for="(track, index) in tracks" :key="index">
-        <p>{{track.name}}</p>
-      </div>
+    <div class="content px-2">
+      <template v-if="tracks.length > 0">
+        <div class="bg-white shadow-md rounded px-8 py-6 ">
+            <div v-for="(track, index) in tracks" :key="index" class="flex">
+              <t-checkbox v-model="track.checked" /><p>{{track.name}}</p>
+            </div>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -32,30 +36,34 @@ export default {
   },
   mounted () {
     console.log(this)
-    pulltracks(this.$store, this.tracks)
+    if(this.sourceToken) {
+      this.pulltracks()
+    }
+    
+  },
+  methods: {
+    pulltracks: function(url = 'https://api.spotify.com/v1/me/tracks?limit=50') {
+      return axios({
+        method: 'get',
+        url,
+        headers: {
+          'Authorization': `Bearer ${this.sourceToken}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        }
+      }).then(response => {
+        var body = response.data
+        for (let i of body.items) {
+          i.track.checked = true
+          this.tracks.push(i.track)
+        } 
+        if (body.next)
+          this.pulltracks(body.next)
+      })
+    }
   },
   computed: mapState(['sourceToken','targetToken']),
 }
-
-function pulltracks(store, tracks = [], url = 'https://api.spotify.com/v1/me/tracks?limit=50') {
-    return axios({
-      method: 'get',
-      url,
-      headers: {
-        'Authorization': `Bearer ${store.state.sourceToken}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-    }).then(response => {
-      var body = response.data
-      console.log("Pull tracks", body.offset + "/" + body.total)
-      for (let i of body.items)
-        tracks = tracks.push(i.track.id)
-      if (body.next)
-        pulltracks(store, tracks, body.next)
-    })
-}
-
 
 function pullfollowing(store, url = "https://api.spotify.com/v1/me/following?type=artist&limit=50") {
 	axios({
