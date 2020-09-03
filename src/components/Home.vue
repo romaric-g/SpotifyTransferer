@@ -37,8 +37,8 @@ export default {
   computed: mapState(['sourceToken','targetToken']),
 }
 
-function pulltracks(store, tracks, url = 'https://api.spotify.com/v1/me/tracks?limit=50') {
-    axios({
+function pulltracks(store, tracks = [], url = 'https://api.spotify.com/v1/me/tracks?limit=50') {
+    return axios({
       method: 'get',
       url,
       headers: {
@@ -50,11 +50,9 @@ function pulltracks(store, tracks, url = 'https://api.spotify.com/v1/me/tracks?l
       var body = response.data
       console.log("Pull tracks", body.offset + "/" + body.total)
       for (let i of body.items)
-        tracks.push(i.track.id)
+        tracks = tracks.push(i.track.id)
       if (body.next)
         pulltracks(store, tracks, body.next)
-
-      console.log(this)
     })
 }
 
