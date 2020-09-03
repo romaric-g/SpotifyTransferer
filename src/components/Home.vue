@@ -40,6 +40,7 @@ function pulltracks(store, url = 'https://api.coindesk.com/v1/bpi/currentprice.j
       method: 'get',
       url,
       headers: {
+        'X-Requested-With': 'XMLHttpRequest',
         'Authorization': `Bearer ${store.state.sourceToken}`,
         'Accept': 'application/json',
         'Content-Type': 'application/json'
