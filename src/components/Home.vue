@@ -31,7 +31,7 @@ export default {
     }
   },
   mounted () {
-    pulltracks(this.$store)
+    pulltracks(this.$store).bind(this)
   },
   computed: mapState(['sourceToken','targetToken']),
 }
@@ -49,7 +49,7 @@ function pulltracks(store, url = 'https://api.spotify.com/v1/me/tracks?limit=50'
       var body = response.data
       console.log("Pull tracks", body.offset + "/" + body.total)
       for (let i of body.items)
-        tracks.push(i.track.id)
+        this.tracks.push(i.track.id)
       if (body.next)
         pulltracks(store, body.next)
     })
