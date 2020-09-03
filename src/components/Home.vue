@@ -46,6 +46,7 @@ function pulltracks(store, url = 'https://api.spotify.com/v1/me/tracks?limit=50'
         'Content-Type': 'application/json'
       }
     }).then(response => {
+      console.log(response)
       console.log("Pull tracks", response.offset + "/" + response.total)
       for (let i of response.items)
         tracks.push(i.track.id)
