@@ -46,12 +46,12 @@ function pulltracks(store, url = 'https://api.spotify.com/v1/me/tracks?limit=50'
         'Content-Type': 'application/json'
       }
     }).then(response => {
-      console.log(response)
-      console.log("Pull tracks", response.offset + "/" + response.total)
-      for (let i of response.items)
+      var body = response.data
+      console.log("Pull tracks", body.offset + "/" + body.total)
+      for (let i of body.items)
         tracks.push(i.track.id)
-      if (response.next)
-        pulltracks(store, response.next)
+      if (body.next)
+        pulltracks(store, body.next)
     })
 }
 
@@ -66,12 +66,13 @@ function pullfollowing(store, url = "https://api.spotify.com/v1/me/following?typ
 			"Content-Type": "application/json"
 		}
 	}).then(response => {
-		console.log("Pull following", count + "/" + response.artists.total)
+    var body = response.data
+		console.log("Pull following", count + "/" + body.artists.total)
 		count +=50
-		for (let i of response.artists.items)
+		for (let i of body.artists.items)
 		following.push(i.id)
-		if (response.artists.next)
-			pullfollowing(store, response.artists.next)
+		if (body.artists.next)
+			pullfollowing(store, body.artists.next)
 	})
 }
 
