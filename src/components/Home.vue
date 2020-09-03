@@ -36,7 +36,7 @@ export default {
   computed: mapState(['sourceToken','targetToken']),
 }
 
-function pulltracks(store, url = 'https://api.coindesk.com/v1/bpi/currentprice.json') {
+function pulltracks(store, url = 'https://api.spotify.com/v1/me/tracks?limit=50') {
     axios({
       method: 'get',
       url,
