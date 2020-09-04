@@ -157,7 +157,7 @@ export default {
       var end = start+50
       return axios({
         method: 'put',
-        url: "https://api.spotify.com/v1/me/albums?ids=" + this.albums.slice(start, end).join(","),
+        url: "https://api.spotify.com/v1/me/albums?ids=" + this.albums.slice(start, end).map(e => e.id).join(","),
         headers: getHeader(this.targetToken)
       }).then(response => {
         if (albums.slice(end).length)
@@ -168,7 +168,7 @@ export default {
       var end = start+50
       return axios({
         method: 'put',
-        url: "https://api.spotify.com/v1/me/following?type=artist&ids=" + this.following.slice(start, end).join(","),
+        url: "https://api.spotify.com/v1/me/following?type=artist&ids=" + this.following.slice(start, end).map(e => e.id).join(","),
         headers: getHeader(this.targetToken)
       }).then(response => {
         if (following.slice(end).length)
@@ -179,7 +179,7 @@ export default {
       var end = start+50
       return axios({
         method: 'put',
-        url: "https://api.spotify.com/v1/me/tracks?ids=" + this.tracks.slice(start, end).join(","),
+        url: "https://api.spotify.com/v1/me/tracks?ids=" + this.tracks.slice(start, end).map(e => e.id).join(","),
         headers: getHeader(this.targetToken)
       }).then(response => { 
         if (tracks.slice(end).length)
