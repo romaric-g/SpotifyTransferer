@@ -16,7 +16,7 @@ export default {
     auth: function(event) {
       var origin = new URL(location.href).origin
       
-      var scopes = "user-library-read playlist-read-private user-follow-read";
+      var scopes = "user-library-read user-library-modify playlist-read-private playlist-modify-private user-follow-read user-follow-modify";
       window.location = ("https://accounts.spotify.com/authorize?response_type=token" +
           "&client_id=" + this.client_id +
           "&scope=" + encodeURIComponent(scopes) +
