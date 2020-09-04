@@ -160,7 +160,7 @@ export default {
         url: "https://api.spotify.com/v1/me/albums?ids=" + this.albums.slice(start, end).map(e => e.id).join(","),
         headers: getHeader(this.targetToken)
       }).then(response => {
-        if (albums.slice(end).length)
+        if (this.albums.slice(end).length)
           this.pushalbums(end)
       })
     },
@@ -171,7 +171,7 @@ export default {
         url: "https://api.spotify.com/v1/me/following?type=artist&ids=" + this.following.slice(start, end).map(e => e.id).join(","),
         headers: getHeader(this.targetToken)
       }).then(response => {
-        if (following.slice(end).length)
+        if (this.following.slice(end).length)
           this.pushfollowing(end)
       })
     },
@@ -182,7 +182,7 @@ export default {
         url: "https://api.spotify.com/v1/me/tracks?ids=" + this.tracks.slice(start, end).map(e => e.id).join(","),
         headers: getHeader(this.targetToken)
       }).then(response => { 
-        if (tracks.slice(end).length)
+        if (this.tracks.slice(end).length)
           this.pushtracks(end)
       })
     },
