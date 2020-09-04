@@ -10,36 +10,45 @@
     </div>
     <div class="content px-2">
       <div class="bg-white shadow-md rounded px-8 py-6 ">
-        <div id="menu">
-          <span class="mr-4">
-            <t-checkbox :checked="allSelected" @change="setSelectAll" /><label class="mx-4 flex-1">Tout sélectionner</label>
-          </span>
-          <span class="mr-4">
-            <t-checkbox :checked="allTracksSelected" @change="select => setSelectAllArray(tracks,select)" /><label class="mx-4 flex-1">Titres</label>
-          </span>
-          <span class="mr-4">
-            <t-checkbox :checked="allFollowingSelected" @change="select => setSelectAllArray(following,select)" /><label class="mx-4 flex-1">Artistes suivis</label>
-          </span>
-          <span class="mr-4">
-            <t-checkbox :checked="allAlbumsSelected" @change="select => setSelectAllArray(albums,select)" /><label class="mx-4 flex-1">Albums</label>
-          </span>
+        <div id="menu" class="flex justify-between items-center my-2">
+          <div id="filter">
+            <label  class="mr-8">
+              <t-checkbox :disabled="transfertStart" :checked="allSelected" @change="setSelectAll" />
+              <span class="ml-1">Tout sélectionner</span>
+            </label >
+            <label class="mr-8">
+              <t-checkbox :disabled="transfertStart" :checked="allTracksSelected" @change="select => setSelectAllArray(tracks,select)" />
+              <span class="ml-1">Titres</span>
+            </label >
+            <label class="mr-8">
+              <t-checkbox :disabled="transfertStart" :checked="allFollowingSelected" @change="select => setSelectAllArray(following,select)" />
+              <span class="ml-1">Artistes suivis</span>
+            </label >
+            <label class="mr-8">
+              <t-checkbox :disabled="transfertStart" :checked="allAlbumsSelected" @change="select => setSelectAllArray(albums,select)" />
+              <span class="ml-1">Albums</span>
+            </label >
+          </div>
+          <div id="transfert">
+            <t-button @click="startTransfert">Transferer</t-button>
+          </div>
         </div>
         <hr class="border-solid">
         <div id="tracks">
           <div v-for="(track, index) in tracks" :key="index" class="flex items-center my-1">
-            <t-checkbox class="mr-4" v-model="track.checked" /><p class="mx-4 flex-1">{{track.name}}</p>
+            <t-checkbox :disabled="transfertStart" class="mr-4" v-model="track.checked" /><p class="mx-4 flex-1">{{track.name}}</p>
           </div>
         </div>
         <hr class="border-solid">
         <div id="following">
           <div v-for="(follow, index) in following" :key="index" class="flex items-center my-1">
-            <t-checkbox class="mr-4" v-model="follow.checked" /><p class="mx-4 flex-1">{{follow.name}}</p>
+            <t-checkbox :disabled="transfertStart" class="mr-4" v-model="follow.checked" /><p class="mx-4 flex-1">{{follow.name}}</p>
           </div>
         </div>
         <hr class="border-solid">
         <div id="albums">
           <div v-for="(album, index) in albums" :key="index" class="flex items-center my-1">
-            <t-checkbox class="mr-4" v-model="album.checked" /><p class="mx-4 flex-1">{{album.name}}</p>
+            <t-checkbox :disabled="transfertStart" class="mr-4" v-model="album.checked" /><p class="mx-4 flex-1">{{album.name}}</p>
           </div>
         </div>
         <hr class="border-solid">
@@ -58,6 +67,7 @@ export default {
   components: {AuthSpotify},
   data: function() {
     return {
+      transfertStart: false,
       tracks: [],//[{name: "Track 1", checked: true},{name: "Track 2", checked: true},{name: "Track 3", checked: true}],
       following: [],//[{name: "following 1", checked: true},{name: "following 2", checked: true},{name: "following 3", checked: true}],
       albums: [],//[{name: "Album 1", checked: true},{name: "Album 2", checked: true},{name: "Album 3", checked: true}],
@@ -73,10 +83,7 @@ export default {
   },
   methods: {
     setSelectAll: function(select) {
-      console.log("CALL ALL")
-        console.log(this.allSelected + " 0 " + select)
         if(this.allSelected || select) {
-          console.log("CALL ALL ok")
           this.setSelectAllArray(this.tracks, select)
           this.setSelectAllArray(this.following, select)
           this.setSelectAllArray(this.albums, select)
@@ -84,7 +91,6 @@ export default {
 
     },
     setSelectAllArray: function(array, select) {
-      console.log("CALL")
       if(this.allIsSelected(array) || select) {
         array.forEach(element => {
           element.checked = select
@@ -94,11 +100,18 @@ export default {
     allIsSelected: function(array) {
       return !array.some(e => e.checked === false)
     },
+    startTransfert: function() {
+      console.log("TRANSFER...")
+      this.transfertStart = true
+      this.pushalbums()
+      this.pushfollowing()
+      this.pushtracks()
+    },
     pulltracks: function(url = 'https://api.spotify.com/v1/me/tracks?limit=50') {
       return axios({
         method: 'get',
         url,
-        headers: getHeader(this)
+        headers: getHeader(this.sourceToken)
       }).then(response => {
         var body = response.data
         for (let i of body.items) {
@@ -113,7 +126,7 @@ export default {
       return axios({
         method: 'get',
         url,
-        headers: getHeader(this)
+        headers: getHeader(this.sourceToken)
       }).then(response => {
         var body = response.data
         for (let i of body.artists.items) {
@@ -129,7 +142,7 @@ export default {
       return axios({
         method: 'get',
         url,
-        headers: getHeader(this)
+        headers: getHeader(this.sourceToken)
       }).then(response => {
         var body = response.data
         for (let i of body.items) {
@@ -138,6 +151,39 @@ export default {
         }
         if (body.next)
           this.pullalbums(body.next)
+      })
+    },
+    pushalbums: function(start = 0) {
+      var end = start+50
+      return axios({
+        method: 'put',
+        url: "https://api.spotify.com/v1/me/albums?ids=" + this.albums.slice(start, end).join(","),
+        headers: getHeader(this.targetToken)
+      }).then(response => {
+        if (albums.slice(end).length)
+          this.pushalbums(end)
+      })
+    },
+    pushfollowing: function(start = 0) {
+      var end = start+50
+      return axios({
+        method: 'put',
+        url: "https://api.spotify.com/v1/me/following?type=artist&ids=" + this.following.slice(start, end).join(","),
+        headers: getHeader(this.targetToken)
+      }).then(response => {
+        if (following.slice(end).length)
+          this.pushfollowing(end)
+      })
+    },
+    pushtracks: function(start = 0) {
+      var end = start+50
+      return axios({
+        method: 'put',
+        url: "https://api.spotify.com/v1/me/tracks?ids=" + this.tracks.slice(start, end).join(","),
+        headers: getHeader(this.targetToken)
+      }).then(response => { 
+        if (tracks.slice(end).length)
+          this.pushtracks(end)
       })
     },
   },
@@ -156,9 +202,9 @@ export default {
   },
 }
 
-function getHeader(instance) {
+function getHeader(token) {
   return  {
-            'Authorization': `Bearer ${instance.sourceToken}`,
+            'Authorization': `Bearer ${token}`,
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           }
