@@ -207,11 +207,11 @@ export default {
       var end = start+1
       return axios({
         method: 'put',
-        url: "https://api.spotify.com/v1/me/tracks?ids=" + this.tracks.slice(start, end).filter(item => item.checked).map(e => e.id).join(","),
+        url: "https://api.spotify.com/v1/me/tracks?ids=" + this.tracks.reverse().slice(start, end).filter(item => item.checked).map(e => e.id).join(","),
         headers: getHeader(this.targetToken)
       }).then(response => { 
         if (this.tracks.slice(end).length)
-          this.pushtracks(end)
+          setTimeout(() => this.pushtracks(end), 50)
       })
     },
   },
