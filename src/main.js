@@ -20,8 +20,8 @@ const theme = {
     variants: {}
   },
   TCheckbox: {
-    fixedClasses: 'form-checkbox transition duration-150 ease-in-out',
-    classes: 'text-orange-500',
+    fixedClasses: 'form-checkbox',
+    classes: 'text-green',
   }
 }
 

@@ -1,57 +1,62 @@
 <template>
   <div>
-    <div class="flex justify-between mb-4">
-      <div class="w-2/5 px-2">
+    <div class="flex flex-wrap justify-between">
+      <div class="w-full md:w-1/2 px-2 mb-4">
         <AuthSpotify type="source" :token="sourceToken"/>
       </div>
-      <div class="w-2/5 px-2">
+      <div class="w-full md:w-1/2 px-2 mb-4">
         <AuthSpotify type="target" :token="targetToken"/>
       </div>
     </div>
     <div class="content px-2">
-      <div class="bg-white shadow-md rounded px-8 py-6 ">
-        <div id="menu" class="flex justify-between items-center my-2">
-          <div id="filter">
-            <label  class="mr-8">
-              <t-checkbox :disabled="transfertStart" :checked="allSelected" @change="setSelectAll" />
-              <span class="ml-1">Tout sélectionner</span>
+      <div class="py-6 md:px-10 bg-white text-black">
+        <div id="menu" class="flex flex-wrap justify-between items-center my-2">
+          <div id="filter" class="px-4">
+            <label class="inline-flex items-center mr-8">
+              <input type="checkbox" class="form-checkbox text-green" :disabled="transfertStart" :checked="allSelected" @input="event => setSelectAll(event)" />
+              <span class="ml-2">Tout sélectionner</span>
             </label >
-            <label class="mr-8">
-              <t-checkbox :disabled="transfertStart" :checked="allTracksSelected" @change="select => setSelectAllArray(tracks,select)" />
-              <span class="ml-1">Titres</span>
+            <label class="inline-flex items-center mr-8">
+              <input type="checkbox" class="form-checkbox text-green" :disabled="transfertStart" :checked="allTracksSelected" @input="event => setSelectAllArray(tracks,event)" />
+              <span class="ml-2">Titres</span>
             </label >
-            <label class="mr-8">
-              <t-checkbox :disabled="transfertStart" :checked="allFollowingSelected" @change="select => setSelectAllArray(following,select)" />
-              <span class="ml-1">Artistes suivis</span>
+            <label class="inline-flex items-center mr-8">
+              <input type="checkbox" class="form-checkbox text-green" :disabled="transfertStart" :checked="allFollowingSelected" @input="event => setSelectAllArray(following,event)" />
+              <span class="ml-2">Artistes suivis</span>
             </label >
-            <label class="mr-8">
-              <t-checkbox :disabled="transfertStart" :checked="allAlbumsSelected" @change="select => setSelectAllArray(albums,select)" />
-              <span class="ml-1">Albums</span>
+            <label class="inline-flex items-center mr-8">
+              <input type="checkbox" class="form-checkbox text-green" :disabled="transfertStart" :checked="allAlbumsSelected" @input="event => setSelectAllArray(albums,event)" />
+              <span class="ml-2">Albums</span>
             </label >
           </div>
-          <div id="transfert">
-            <t-button @click="startTransfert">Transferer</t-button>
+          <div id="transfert" class="flex-1 flex my-4 md:my-0 justify-center md:justify-end">
+            <t-button @click="startTransfert">Transferer<i class="ml-2 fas fa-file-import"></i></t-button>
           </div>
         </div>
-        <hr class="border-solid">
-        <div id="tracks">
-          <div v-for="(track, index) in tracks" :key="index" class="flex items-center my-1">
-            <t-checkbox :disabled="transfertStart" class="mr-4" v-model="track.checked" /><p class="mx-4 flex-1">{{track.name}}</p>
+        <template v-if="following.length > 0">
+          <hr class="border-solid border-lightgray">
+          <div id="tracks">
+            <!-- <div v-for="(track, index) in tracks" :key="index" class="flex items-center my-1">
+              <t-checkbox :disabled="transfertStart" class="mr-4" v-model="track.checked" /><p class="mx-4 flex-1">{{track.name}}</p>
+            </div> -->
+            <HomeRow v-for="(track, index) in tracks" :key="index" :item="tracks[index]" :disabled="transfertStart" :dark="toggleAlternDarkRow()" />
           </div>
-        </div>
-        <hr class="border-solid">
-        <div id="following">
-          <div v-for="(follow, index) in following" :key="index" class="flex items-center my-1">
-            <t-checkbox :disabled="transfertStart" class="mr-4" v-model="follow.checked" /><p class="mx-4 flex-1">{{follow.name}}</p>
+        </template>
+        <template v-if="following.length > 0">
+          <hr class="border-solid border-lightgray">
+          <div id="following">
+            <!-- <div v-for="(follow, index) in following" :key="index" class="flex items-center my-1">
+              <t-checkbox :disabled="transfertStart" class="mr-4" v-model="follow.checked" /><p class="mx-4 flex-1">{{follow.name}}</p>
+            </div> -->
+            <HomeRow v-for="(follow, index) in following" :key="index" :item="following[index]" :disabled="transfertStart" :dark="toggleAlternDarkRow()"/>
           </div>
-        </div>
-        <hr class="border-solid">
-        <div id="albums">
-          <div v-for="(album, index) in albums" :key="index" class="flex items-center my-1">
-            <t-checkbox :disabled="transfertStart" class="mr-4" v-model="album.checked" /><p class="mx-4 flex-1">{{album.name}}</p>
+        </template>
+        <template v-if="albums.length > 0">
+          <hr class="border-solid border-gray-100">
+          <div id="albums">
+            <HomeRow v-for="(album, index) in albums" :key="index" :item="albums[index]" :disabled="transfertStart" :dark="toggleAlternDarkRow()" />
           </div>
-        </div>
-        <hr class="border-solid">
+        </template>
       </div>
     </div>
   </div>
@@ -59,38 +64,59 @@
 
 <script>
 import AuthSpotify from '@/components/AuthSpotify.vue'
+import HomeRow from '@/components/HomeRow.vue'
 import axios from 'axios'
 import { mapState } from 'vuex'
 
+var alternDarkRow = false
+
 export default {
   name: 'Home',
-  components: {AuthSpotify},
+  components: {AuthSpotify,HomeRow},
   data: function() {
     return {
       transfertStart: false,
-      tracks: [],//[{name: "Track 1", checked: true},{name: "Track 2", checked: true},{name: "Track 3", checked: true}],
-      following: [],//[{name: "following 1", checked: true},{name: "following 2", checked: true},{name: "following 3", checked: true}],
+      tracks: [
+        {checked: true, "album":{"album_type":"single","artists":[{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/3UV0wVQkft6lKLDGioqnyO"},"href":"https:\/\/api.spotify.com\/v1\/artists\/3UV0wVQkft6lKLDGioqnyO","id":"3UV0wVQkft6lKLDGioqnyO","name":"Coopex","type":"artist","uri":"spotify:artist:3UV0wVQkft6lKLDGioqnyO"},{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/619CzMJPPWrCeZwx5qw6ko"},"href":"https:\/\/api.spotify.com\/v1\/artists\/619CzMJPPWrCeZwx5qw6ko","id":"619CzMJPPWrCeZwx5qw6ko","name":"Besomorph","type":"artist","uri":"spotify:artist:619CzMJPPWrCeZwx5qw6ko"}],"available_markets":["AD","AE","AL","AR","AT","AU","BA","BE","BG","BH","BO","BR","BY","CA","CH","CL","CO","CR","CY","CZ","DE","DK","DO","DZ","EC","EE","EG","ES","FI","FR","GB","GR","GT","HK","HN","HR","HU","ID","IE","IL","IN","IS","IT","JO","JP","KW","KZ","LB","LI","LT","LU","LV","MA","MC","MD","ME","MK","MT","MX","MY","NI","NL","NO","NZ","OM","PA","PE","PH","PL","PS","PT","PY","QA","RO","RS","RU","SA","SE","SG","SI","SK","SV","TH","TN","TR","TW","UA","US","UY","VN","XK","ZA"],"external_urls":{"spotify":"https:\/\/open.spotify.com\/album\/0p1b4G5MinMunzsf4MAS3M"},"href":"https:\/\/api.spotify.com\/v1\/albums\/0p1b4G5MinMunzsf4MAS3M","id":"0p1b4G5MinMunzsf4MAS3M","images":[{"height":640,"url":"https:\/\/i.scdn.co\/image\/ab67616d0000b273fca8bfa00a37e25717e5bf48","width":640},{"height":300,"url":"https:\/\/i.scdn.co\/image\/ab67616d00001e02fca8bfa00a37e25717e5bf48","width":300},{"height":64,"url":"https:\/\/i.scdn.co\/image\/ab67616d00004851fca8bfa00a37e25717e5bf48","width":64}],"name":"On the Line","release_date":"2019-06-28","release_date_precision":"day","total_tracks":1,"type":"album","uri":"spotify:album:0p1b4G5MinMunzsf4MAS3M"},"artists":[{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/3UV0wVQkft6lKLDGioqnyO"},"href":"https:\/\/api.spotify.com\/v1\/artists\/3UV0wVQkft6lKLDGioqnyO","id":"3UV0wVQkft6lKLDGioqnyO","name":"Coopex","type":"artist","uri":"spotify:artist:3UV0wVQkft6lKLDGioqnyO"},{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/619CzMJPPWrCeZwx5qw6ko"},"href":"https:\/\/api.spotify.com\/v1\/artists\/619CzMJPPWrCeZwx5qw6ko","id":"619CzMJPPWrCeZwx5qw6ko","name":"Besomorph","type":"artist","uri":"spotify:artist:619CzMJPPWrCeZwx5qw6ko"},{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/3GQj08iHefTniyhHjCVBov"},"href":"https:\/\/api.spotify.com\/v1\/artists\/3GQj08iHefTniyhHjCVBov","id":"3GQj08iHefTniyhHjCVBov","name":"Galvanic","type":"artist","uri":"spotify:artist:3GQj08iHefTniyhHjCVBov"}],"available_markets":["AD","AE","AL","AR","AT","AU","BA","BE","BG","BH","BO","BR","BY","CA","CH","CL","CO","CR","CY","CZ","DE","DK","DO","DZ","EC","EE","EG","ES","FI","FR","GB","GR","GT","HK","HN","HR","HU","ID","IE","IL","IN","IS","IT","JO","JP","KW","KZ","LB","LI","LT","LU","LV","MA","MC","MD","ME","MK","MT","MX","MY","NI","NL","NO","NZ","OM","PA","PE","PH","PL","PS","PT","PY","QA","RO","RS","RU","SA","SE","SG","SI","SK","SV","TH","TN","TR","TW","UA","US","UY","VN","XK","ZA"],"disc_number":1,"duration_ms":185200,"explicit":false,"external_ids":{"isrc":"GBKPL1951597"},"external_urls":{"spotify":"https:\/\/open.spotify.com\/track\/7pS9bOFyI75UZNoxPNC94v"},"href":"https:\/\/api.spotify.com\/v1\/tracks\/7pS9bOFyI75UZNoxPNC94v","id":"7pS9bOFyI75UZNoxPNC94v","is_local":false,"name":"On the Line","popularity":39,"preview_url":"https:\/\/p.scdn.co\/mp3-preview\/61de864a07b6958566aca35187efd5c6ee3257e7?cid=bb2b7c9972734a27b963920645abc5b7","track_number":1,"type":"track","uri":"spotify:track:7pS9bOFyI75UZNoxPNC94v"},
+        {checked: true, "album":{"album_type":"single","artists":[{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/3UV0wVQkft6lKLDGioqnyO"},"href":"https:\/\/api.spotify.com\/v1\/artists\/3UV0wVQkft6lKLDGioqnyO","id":"3UV0wVQkft6lKLDGioqnyO","name":"Coopex","type":"artist","uri":"spotify:artist:3UV0wVQkft6lKLDGioqnyO"},{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/619CzMJPPWrCeZwx5qw6ko"},"href":"https:\/\/api.spotify.com\/v1\/artists\/619CzMJPPWrCeZwx5qw6ko","id":"619CzMJPPWrCeZwx5qw6ko","name":"Besomorph","type":"artist","uri":"spotify:artist:619CzMJPPWrCeZwx5qw6ko"}],"available_markets":["AD","AE","AL","AR","AT","AU","BA","BE","BG","BH","BO","BR","BY","CA","CH","CL","CO","CR","CY","CZ","DE","DK","DO","DZ","EC","EE","EG","ES","FI","FR","GB","GR","GT","HK","HN","HR","HU","ID","IE","IL","IN","IS","IT","JO","JP","KW","KZ","LB","LI","LT","LU","LV","MA","MC","MD","ME","MK","MT","MX","MY","NI","NL","NO","NZ","OM","PA","PE","PH","PL","PS","PT","PY","QA","RO","RS","RU","SA","SE","SG","SI","SK","SV","TH","TN","TR","TW","UA","US","UY","VN","XK","ZA"],"external_urls":{"spotify":"https:\/\/open.spotify.com\/album\/0p1b4G5MinMunzsf4MAS3M"},"href":"https:\/\/api.spotify.com\/v1\/albums\/0p1b4G5MinMunzsf4MAS3M","id":"0p1b4G5MinMunzsf4MAS3M","images":[{"height":640,"url":"https:\/\/i.scdn.co\/image\/ab67616d0000b273fca8bfa00a37e25717e5bf48","width":640},{"height":300,"url":"https:\/\/i.scdn.co\/image\/ab67616d00001e02fca8bfa00a37e25717e5bf48","width":300},{"height":64,"url":"https:\/\/i.scdn.co\/image\/ab67616d00004851fca8bfa00a37e25717e5bf48","width":64}],"name":"On the Line","release_date":"2019-06-28","release_date_precision":"day","total_tracks":1,"type":"album","uri":"spotify:album:0p1b4G5MinMunzsf4MAS3M"},"artists":[{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/3UV0wVQkft6lKLDGioqnyO"},"href":"https:\/\/api.spotify.com\/v1\/artists\/3UV0wVQkft6lKLDGioqnyO","id":"3UV0wVQkft6lKLDGioqnyO","name":"Coopex","type":"artist","uri":"spotify:artist:3UV0wVQkft6lKLDGioqnyO"},{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/619CzMJPPWrCeZwx5qw6ko"},"href":"https:\/\/api.spotify.com\/v1\/artists\/619CzMJPPWrCeZwx5qw6ko","id":"619CzMJPPWrCeZwx5qw6ko","name":"Besomorph","type":"artist","uri":"spotify:artist:619CzMJPPWrCeZwx5qw6ko"},{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/3GQj08iHefTniyhHjCVBov"},"href":"https:\/\/api.spotify.com\/v1\/artists\/3GQj08iHefTniyhHjCVBov","id":"3GQj08iHefTniyhHjCVBov","name":"Galvanic","type":"artist","uri":"spotify:artist:3GQj08iHefTniyhHjCVBov"}],"available_markets":["AD","AE","AL","AR","AT","AU","BA","BE","BG","BH","BO","BR","BY","CA","CH","CL","CO","CR","CY","CZ","DE","DK","DO","DZ","EC","EE","EG","ES","FI","FR","GB","GR","GT","HK","HN","HR","HU","ID","IE","IL","IN","IS","IT","JO","JP","KW","KZ","LB","LI","LT","LU","LV","MA","MC","MD","ME","MK","MT","MX","MY","NI","NL","NO","NZ","OM","PA","PE","PH","PL","PS","PT","PY","QA","RO","RS","RU","SA","SE","SG","SI","SK","SV","TH","TN","TR","TW","UA","US","UY","VN","XK","ZA"],"disc_number":1,"duration_ms":185200,"explicit":false,"external_ids":{"isrc":"GBKPL1951597"},"external_urls":{"spotify":"https:\/\/open.spotify.com\/track\/7pS9bOFyI75UZNoxPNC94v"},"href":"https:\/\/api.spotify.com\/v1\/tracks\/7pS9bOFyI75UZNoxPNC94v","id":"7pS9bOFyI75UZNoxPNC94v","is_local":false,"name":"On the Line","popularity":39,"preview_url":"https:\/\/p.scdn.co\/mp3-preview\/61de864a07b6958566aca35187efd5c6ee3257e7?cid=bb2b7c9972734a27b963920645abc5b7","track_number":1,"type":"track","uri":"spotify:track:7pS9bOFyI75UZNoxPNC94v"},
+        {checked: true, "album":{"album_type":"single","artists":[{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/3UV0wVQkft6lKLDGioqnyO"},"href":"https:\/\/api.spotify.com\/v1\/artists\/3UV0wVQkft6lKLDGioqnyO","id":"3UV0wVQkft6lKLDGioqnyO","name":"Coopex","type":"artist","uri":"spotify:artist:3UV0wVQkft6lKLDGioqnyO"},{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/619CzMJPPWrCeZwx5qw6ko"},"href":"https:\/\/api.spotify.com\/v1\/artists\/619CzMJPPWrCeZwx5qw6ko","id":"619CzMJPPWrCeZwx5qw6ko","name":"Besomorph","type":"artist","uri":"spotify:artist:619CzMJPPWrCeZwx5qw6ko"}],"available_markets":["AD","AE","AL","AR","AT","AU","BA","BE","BG","BH","BO","BR","BY","CA","CH","CL","CO","CR","CY","CZ","DE","DK","DO","DZ","EC","EE","EG","ES","FI","FR","GB","GR","GT","HK","HN","HR","HU","ID","IE","IL","IN","IS","IT","JO","JP","KW","KZ","LB","LI","LT","LU","LV","MA","MC","MD","ME","MK","MT","MX","MY","NI","NL","NO","NZ","OM","PA","PE","PH","PL","PS","PT","PY","QA","RO","RS","RU","SA","SE","SG","SI","SK","SV","TH","TN","TR","TW","UA","US","UY","VN","XK","ZA"],"external_urls":{"spotify":"https:\/\/open.spotify.com\/album\/0p1b4G5MinMunzsf4MAS3M"},"href":"https:\/\/api.spotify.com\/v1\/albums\/0p1b4G5MinMunzsf4MAS3M","id":"0p1b4G5MinMunzsf4MAS3M","images":[{"height":640,"url":"https:\/\/i.scdn.co\/image\/ab67616d0000b273fca8bfa00a37e25717e5bf48","width":640},{"height":300,"url":"https:\/\/i.scdn.co\/image\/ab67616d00001e02fca8bfa00a37e25717e5bf48","width":300},{"height":64,"url":"https:\/\/i.scdn.co\/image\/ab67616d00004851fca8bfa00a37e25717e5bf48","width":64}],"name":"On the Line","release_date":"2019-06-28","release_date_precision":"day","total_tracks":1,"type":"album","uri":"spotify:album:0p1b4G5MinMunzsf4MAS3M"},"artists":[{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/3UV0wVQkft6lKLDGioqnyO"},"href":"https:\/\/api.spotify.com\/v1\/artists\/3UV0wVQkft6lKLDGioqnyO","id":"3UV0wVQkft6lKLDGioqnyO","name":"Coopex","type":"artist","uri":"spotify:artist:3UV0wVQkft6lKLDGioqnyO"},{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/619CzMJPPWrCeZwx5qw6ko"},"href":"https:\/\/api.spotify.com\/v1\/artists\/619CzMJPPWrCeZwx5qw6ko","id":"619CzMJPPWrCeZwx5qw6ko","name":"Besomorph","type":"artist","uri":"spotify:artist:619CzMJPPWrCeZwx5qw6ko"},{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/3GQj08iHefTniyhHjCVBov"},"href":"https:\/\/api.spotify.com\/v1\/artists\/3GQj08iHefTniyhHjCVBov","id":"3GQj08iHefTniyhHjCVBov","name":"Galvanic","type":"artist","uri":"spotify:artist:3GQj08iHefTniyhHjCVBov"}],"available_markets":["AD","AE","AL","AR","AT","AU","BA","BE","BG","BH","BO","BR","BY","CA","CH","CL","CO","CR","CY","CZ","DE","DK","DO","DZ","EC","EE","EG","ES","FI","FR","GB","GR","GT","HK","HN","HR","HU","ID","IE","IL","IN","IS","IT","JO","JP","KW","KZ","LB","LI","LT","LU","LV","MA","MC","MD","ME","MK","MT","MX","MY","NI","NL","NO","NZ","OM","PA","PE","PH","PL","PS","PT","PY","QA","RO","RS","RU","SA","SE","SG","SI","SK","SV","TH","TN","TR","TW","UA","US","UY","VN","XK","ZA"],"disc_number":1,"duration_ms":185200,"explicit":false,"external_ids":{"isrc":"GBKPL1951597"},"external_urls":{"spotify":"https:\/\/open.spotify.com\/track\/7pS9bOFyI75UZNoxPNC94v"},"href":"https:\/\/api.spotify.com\/v1\/tracks\/7pS9bOFyI75UZNoxPNC94v","id":"7pS9bOFyI75UZNoxPNC94v","is_local":false,"name":"On the Line","popularity":39,"preview_url":"https:\/\/p.scdn.co\/mp3-preview\/61de864a07b6958566aca35187efd5c6ee3257e7?cid=bb2b7c9972734a27b963920645abc5b7","track_number":1,"type":"track","uri":"spotify:track:7pS9bOFyI75UZNoxPNC94v"},
+        {checked: true, "album":{"album_type":"single","artists":[{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/3UV0wVQkft6lKLDGioqnyO"},"href":"https:\/\/api.spotify.com\/v1\/artists\/3UV0wVQkft6lKLDGioqnyO","id":"3UV0wVQkft6lKLDGioqnyO","name":"Coopex","type":"artist","uri":"spotify:artist:3UV0wVQkft6lKLDGioqnyO"},{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/619CzMJPPWrCeZwx5qw6ko"},"href":"https:\/\/api.spotify.com\/v1\/artists\/619CzMJPPWrCeZwx5qw6ko","id":"619CzMJPPWrCeZwx5qw6ko","name":"Besomorph","type":"artist","uri":"spotify:artist:619CzMJPPWrCeZwx5qw6ko"}],"available_markets":["AD","AE","AL","AR","AT","AU","BA","BE","BG","BH","BO","BR","BY","CA","CH","CL","CO","CR","CY","CZ","DE","DK","DO","DZ","EC","EE","EG","ES","FI","FR","GB","GR","GT","HK","HN","HR","HU","ID","IE","IL","IN","IS","IT","JO","JP","KW","KZ","LB","LI","LT","LU","LV","MA","MC","MD","ME","MK","MT","MX","MY","NI","NL","NO","NZ","OM","PA","PE","PH","PL","PS","PT","PY","QA","RO","RS","RU","SA","SE","SG","SI","SK","SV","TH","TN","TR","TW","UA","US","UY","VN","XK","ZA"],"external_urls":{"spotify":"https:\/\/open.spotify.com\/album\/0p1b4G5MinMunzsf4MAS3M"},"href":"https:\/\/api.spotify.com\/v1\/albums\/0p1b4G5MinMunzsf4MAS3M","id":"0p1b4G5MinMunzsf4MAS3M","images":[{"height":640,"url":"https:\/\/i.scdn.co\/image\/ab67616d0000b273fca8bfa00a37e25717e5bf48","width":640},{"height":300,"url":"https:\/\/i.scdn.co\/image\/ab67616d00001e02fca8bfa00a37e25717e5bf48","width":300},{"height":64,"url":"https:\/\/i.scdn.co\/image\/ab67616d00004851fca8bfa00a37e25717e5bf48","width":64}],"name":"On the Line","release_date":"2019-06-28","release_date_precision":"day","total_tracks":1,"type":"album","uri":"spotify:album:0p1b4G5MinMunzsf4MAS3M"},"artists":[{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/3UV0wVQkft6lKLDGioqnyO"},"href":"https:\/\/api.spotify.com\/v1\/artists\/3UV0wVQkft6lKLDGioqnyO","id":"3UV0wVQkft6lKLDGioqnyO","name":"Coopex","type":"artist","uri":"spotify:artist:3UV0wVQkft6lKLDGioqnyO"},{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/619CzMJPPWrCeZwx5qw6ko"},"href":"https:\/\/api.spotify.com\/v1\/artists\/619CzMJPPWrCeZwx5qw6ko","id":"619CzMJPPWrCeZwx5qw6ko","name":"Besomorph","type":"artist","uri":"spotify:artist:619CzMJPPWrCeZwx5qw6ko"},{"external_urls":{"spotify":"https:\/\/open.spotify.com\/artist\/3GQj08iHefTniyhHjCVBov"},"href":"https:\/\/api.spotify.com\/v1\/artists\/3GQj08iHefTniyhHjCVBov","id":"3GQj08iHefTniyhHjCVBov","name":"Galvanic","type":"artist","uri":"spotify:artist:3GQj08iHefTniyhHjCVBov"}],"available_markets":["AD","AE","AL","AR","AT","AU","BA","BE","BG","BH","BO","BR","BY","CA","CH","CL","CO","CR","CY","CZ","DE","DK","DO","DZ","EC","EE","EG","ES","FI","FR","GB","GR","GT","HK","HN","HR","HU","ID","IE","IL","IN","IS","IT","JO","JP","KW","KZ","LB","LI","LT","LU","LV","MA","MC","MD","ME","MK","MT","MX","MY","NI","NL","NO","NZ","OM","PA","PE","PH","PL","PS","PT","PY","QA","RO","RS","RU","SA","SE","SG","SI","SK","SV","TH","TN","TR","TW","UA","US","UY","VN","XK","ZA"],"disc_number":1,"duration_ms":185200,"explicit":false,"external_ids":{"isrc":"GBKPL1951597"},"external_urls":{"spotify":"https:\/\/open.spotify.com\/track\/7pS9bOFyI75UZNoxPNC94v"},"href":"https:\/\/api.spotify.com\/v1\/tracks\/7pS9bOFyI75UZNoxPNC94v","id":"7pS9bOFyI75UZNoxPNC94v","is_local":false,"name":"On the Line","popularity":39,"preview_url":"https:\/\/p.scdn.co\/mp3-preview\/61de864a07b6958566aca35187efd5c6ee3257e7?cid=bb2b7c9972734a27b963920645abc5b7","track_number":1,"type":"track","uri":"spotify:track:7pS9bOFyI75UZNoxPNC94v"},
+      ],
+      following: [{name: "following 1", checked: true},{name: "following 2", checked: true},{name: "following 3", checked: true}],
       albums: [],//[{name: "Album 1", checked: true},{name: "Album 2", checked: true},{name: "Album 3", checked: true}],
     }
   },
   mounted () {
-    console.log(this)
+    alternDarkRow = false
     if(this.sourceToken) {
       this.pulltracks()
       this.pullfollowing()
     }
     
   },
+  updated: function () {
+    alternDarkRow = false
+  },
   methods: {
-    setSelectAll: function(select) {
+    toggleAlternDarkRow() {
+      alternDarkRow = !alternDarkRow
+      return alternDarkRow
+    },
+    setSelectAll: function(event) {
+        
+        var select = event.target.checked
+        console.log("select: " + select)
+        console.log("allSelected: " + this.allSelected)
         if(this.allSelected || select) {
-          this.setSelectAllArray(this.tracks, select)
-          this.setSelectAllArray(this.following, select)
-          this.setSelectAllArray(this.albums, select)
+          this.setSelectAllArray(this.tracks, event)
+          this.setSelectAllArray(this.following, event)
+          this.setSelectAllArray(this.albums, event)
         }
 
     },
-    setSelectAllArray: function(array, select) {
+    setSelectAllArray: function(array, event) {
+      var select = event.target.checked
+      console.log("All selected for array: " + this.allIsSelected(array))
       if(this.allIsSelected(array) || select) {
         array.forEach(element => {
           element.checked = select
@@ -157,7 +183,7 @@ export default {
       var end = start+50
       return axios({
         method: 'put',
-        url: "https://api.spotify.com/v1/me/albums?ids=" + this.albums.slice(start, end).map(e => e.id).join(","),
+        url: "https://api.spotify.com/v1/me/albums?ids=" + this.albums.slice(start, end).filter(item => item.checked).map(e => e.id).join(","),
         headers: getHeader(this.targetToken)
       }).then(response => {
         if (this.albums.slice(end).length)
@@ -168,7 +194,7 @@ export default {
       var end = start+50
       return axios({
         method: 'put',
-        url: "https://api.spotify.com/v1/me/following?type=artist&ids=" + this.following.slice(start, end).map(e => e.id).join(","),
+        url: "https://api.spotify.com/v1/me/following?type=artist&ids=" + this.following.slice(start, end).filter(item => item.checked).map(e => e.id).join(","),
         headers: getHeader(this.targetToken)
       }).then(response => {
         if (this.following.slice(end).length)
@@ -176,10 +202,10 @@ export default {
       })
     },
     pushtracks: function(start = 0) {
-      var end = start+50
+      var end = start+1
       return axios({
         method: 'put',
-        url: "https://api.spotify.com/v1/me/tracks?ids=" + this.tracks.slice(start, end).map(e => e.id).join(","),
+        url: "https://api.spotify.com/v1/me/tracks?ids=" + this.tracks.slice(start, end).filter(item => item.checked).map(e => e.id).join(","),
         headers: getHeader(this.targetToken)
       }).then(response => { 
         if (this.tracks.slice(end).length)
@@ -189,11 +215,12 @@ export default {
   },
   computed: {
     allSelected: function() {
-      return (
+      let t = (
         this.allTracksSelected &&
         this.allFollowingSelected &&
         this.allAlbumsSelected
       )
+      return t;
     },
     allTracksSelected: function() { return this.allIsSelected(this.tracks) },
     allFollowingSelected: function() { return this.allIsSelected(this.following) },
