@@ -123,7 +123,7 @@ export default {
     nextTransfert: function() {
       this.startTransfert.current.number = this.startTransfert.current.number + 1;
       this.startTransfert.current.progress = 0;
-      switch(this.transfertState.current.number) {
+      switch(this.startTransfert.current.number) {
         case 1: 
           this.pushtracks()
           break;
