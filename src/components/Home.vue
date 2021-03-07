@@ -116,14 +116,14 @@ export default {
     },
     startTransfert: function() {
       this.transfertStart = true
-      this.startTransfert.open = true
-      this.startTransfert.current = {number: 0, progress: 0}
+      this.transfertState.open = true
+      this.transfertState.current = {number: 0, progress: 0}
       this.nextTransfert()
     },
     nextTransfert: function() {
-      this.startTransfert.current.number = this.startTransfert.current.number + 1;
-      this.startTransfert.current.progress = 0;
-      switch(this.startTransfert.current.number) {
+      this.transfertState.current.number = this.transfertState.current.number + 1;
+      this.transfertState.current.progress = 0;
+      switch(this.transfertState.current.number) {
         case 1: 
           this.pushtracks()
           break;
