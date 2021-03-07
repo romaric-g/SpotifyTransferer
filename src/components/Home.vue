@@ -184,50 +184,45 @@ export default {
       })
     },
     pushalbums: function(start = 0) {
-      if(!this.transfertStart)return;
-      var end = start+50
-      return axios({
-        method: 'put',
-        url: "https://api.spotify.com/v1/me/albums?ids=" + this.albums.slice(start, end).filter(item => item.checked).map(e => e.id).join(","),
-        headers: getHeader(this.targetToken)
-      }).then(response => {
-        if (this.albums.slice(end).length)
-          this.pushalbums(end)
-        else {
-          this.nextTransfert()
-        }
-      })
+      this.pushToSpotify(start, 50, (start, end) => (
+        "https://api.spotify.com/v1/me/albums?ids=" + this.albums.slice(start, end).filter(item => item.checked).map(e => e.id).join(",")
+      ), this.albums, this.pushalbums);
     },
     pushfollowing: function(start = 0) {
-      if(!this.transfertStart)return;
-      var end = start+50
-      return axios({
-        method: 'put',
-        url: "https://api.spotify.com/v1/me/following?type=artist&ids=" + this.following.slice(start, end).filter(item => item.checked).map(e => e.id).join(","),
-        headers: getHeader(this.targetToken)
-      }).then(response => {
-        if (this.following.slice(end).length)
-          this.pushfollowing(end)
-        else {
-          this.nextTransfert()
-        }
-      })
+      this.pushToSpotify(start, 50, (start, end) => (
+        "https://api.spotify.com/v1/me/following?type=artist&ids=" + this.following.slice(start, end).filter(item => item.checked).map(e => e.id).join(",")
+      ), this.following, this.pushfollowing);
     },
     pushtracks: function(start = 0) {
+      this.pushToSpotify(start, 1, (start, end) => (
+        "https://api.spotify.com/v1/me/tracks?ids=" + this.tracks.slice().reverse().slice(start, end).filter(item => item.checked).map(e => e.id).join(",")
+      ), this.tracks, this.pushtracks);
+    },
+    pushToSpotify: function(start = 0, size, buildURL, value, nextPush) {
       if(!this.transfertStart)return;
-      var end = start+1
-      return axios({
-        method: 'put',
-        url: "https://api.spotify.com/v1/me/tracks?ids=" + this.tracks.slice().reverse().slice(start, end).filter(item => item.checked).map(e => e.id).join(","),
-        headers: getHeader(this.targetToken)
-      }).then(response => { 
-        if (this.tracks.slice(end).length)
-          setTimeout(() => this.pushtracks(end), 1000)
+      var end = start+size
+      const next = () => {
+        if (value.slice(end).length){
+          setTimeout(() =>  nextPush(end), 1000);
+          this.updateTransfereProgress(start, value.length);
+        }
         else {
           this.nextTransfert()
         }
+      }
+      return axios({
+        method: 'put',
+        url: buildURL(start, end),
+        headers: getHeader(this.targetToken)
+      }).then(response => {
+        next();
+      }).catch(error => {
+        next();
       })
     },
+    updateTransfereProgress: function(current, max) {
+      this.transfertState.current.progress = current / max * 100;
+    }
   },
   computed: {
     allSelected: function() {
